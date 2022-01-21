@@ -10,9 +10,16 @@ const User = require("../models/User");
 //middleware (fonction) pr enregistrer de nouveaux utilisateurs
 exports.signup = [
 	// email must be an email
-	body("email").isEmail().isIn([".", "-", "_"]),
-	// password must be at least 5 chars long
-	body("password").isLength({ min: 5 }).isIn([".", "-", "_", "&", "/"]),
+	body("email").isEmail(),
+	body("password")
+		.matches(
+			/^(?=.*[A-Z].*[A-Z])(?=.*[!@#&*])(?=.*[0-9].*[0-9])(?=.*[a-z].*[a-z].*[a-z]).{8,}$/
+		)
+		.withMessage(
+			"Le mot de passe doit contenir minimum 8 caractères, une majuscule, un chiffre et un caractère spécial"
+		),
+	// .matches(/\d/)
+	// .withMessage("Le mot de passe doit contenir au moins un chiffre"),
 	(req, res) => {
 		// Finds the validation errors in this request and wraps them in an object with handy functions
 		const errors = validationResult(req);

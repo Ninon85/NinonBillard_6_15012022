@@ -13,13 +13,16 @@ const sauceRoutes = require("./routes/sauce");
 const userRoutes = require("./routes/user");
 //import router for like and dislike
 const likeRoutes = require("./routes/like");
+//import dotenv
+require("dotenv").config();
+
 // Connection MongoDB with Mongoose package for facilitate interactions with MongoDB
 //Replace  SRV adress by yours
 mongoose
-	.connect(
-		"mongodb+srv://piiquante:lBxL4m7DQALbQjdo@cluster0.iuk0t.mongodb.net/cluster0?retryWrites=true&w=majority",
-		{ useNewUrlParser: true, useUnifiedTopology: true }
-	)
+	.connect(process.env.DB_SRV, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
 	.then(() => console.log("Connexion à MongoDB réussie !"))
 	.catch(() => console.log("Connexion à MongoDB échouée !"));
 
