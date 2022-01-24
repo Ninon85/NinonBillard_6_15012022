@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
 	try {
-		//récuperation du token passé dans le header de la requête / split pour que les elements retournés soient séparés par un espace/on recupere un tableau et on veut uniquement recuperer index 1 de ce tableau
+		//récuperation du token passé dans le header de la requête / split  les elements  séparés par un espace/on recupere un tableau et on veut uniquement recuperer index 1 de ce tableau
 		const token = req.headers.authorization.split(" ")[1];
 		//décoder le token Le deuxieme argument de la fonction verify doit etre le meme que dans la fonction login
 		const decodedToken = jwt.verify(token, "RANDOM_TOKEN_SECRET");
