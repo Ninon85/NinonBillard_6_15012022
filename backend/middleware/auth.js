@@ -12,7 +12,7 @@ module.exports = (req, res, next) => {
 		//récuperation du token passé dans le header de la requête / split  les elements  séparés par un espace/on recupere un tableau et on veut uniquement recuperer index 1 de ce tableau
 		const token = req.headers.authorization.split(" ")[1];
 		//décoder le token Le deuxieme argument de la fonction verify doit etre le meme que dans la fonction login
-		const decodedToken = jwt.verify(token, "RANDOM_TOKEN_SECRET");
+		const decodedToken = jwt.verify(token, process.env.TOKEN);
 		//qd on decode le token ca devient un objet js/on recupere le user id
 		const userId = decodedToken.userId;
 		//recupere l'identifiant utilisateur qui fait la requete
