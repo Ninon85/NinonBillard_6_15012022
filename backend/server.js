@@ -2,7 +2,7 @@
 //node server
 //---------------------------
 
-//importe package http of Node package
+//import package http of Node package
 const http = require("http");
 //import application express
 const app = require("./app");
@@ -22,7 +22,7 @@ const normalizePort = (val) => {
 const port = normalizePort(process.env.PORT || "3000");
 //set the port for express application
 app.set("port", port);
-// find different errors
+// function to manage errors
 const errorHandler = (error) => {
 	if (error.syscall !== "listen") {
 		throw error;

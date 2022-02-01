@@ -1,15 +1,21 @@
-//Framework express for easily create server
-
-// import express
+//---------------------------------------------------------------
+//Express application
+//---------------------------------------------------------------
+//import Framework express for easily create server
 const express = require("express");
-// importation de mongoose
+// import mongoose
 const mongoose = require("mongoose");
-// // importation du chemin système de fichiers
+// // import path for files paths
 const path = require("path");
-// importation du router
+
+// // protect data base of injection NoSQL
+// const mongoSanitize = require("express-mongo-sanitize");
+//import helmet for secure headers HTTP - hide header "X-Powered-By" who disclose server - protection against XXS
+const helmet = require("helmet");
+// import router for sauce
 const sauceRoutes = require("./routes/sauce");
 
-// importation du routeur pour les user
+// import router for user user
 const userRoutes = require("./routes/user");
 //import router for like and dislike
 const likeRoutes = require("./routes/like");
@@ -24,24 +30,23 @@ mongoose
 		useUnifiedTopology: true,
 	})
 	.then(() => console.log("Connexion à MongoDB réussie !"))
-	.catch(() => console.log("Connexion à MongoDB échouée !"));
+	.catch((err) => console.log("Connexion à MongoDB échouée !", err));
 
 //create appli express
 const app = express();
-
 // headers à res pour eviter erreur Cross Origin Resource Sharing (CORS= security by default who block HTTP request beetween different servers(AJAX request are forbiden by default for prevent malicious request) / frontend and backend haven't the same origne (port are not the same))
 app.use((req, res, next) => {
 	//access to API from any origin "*"
 	res.setHeader("Access-Control-Allow-Origin", "*");
 	res.setHeader(
-		//allow this headers for request send at API
+		//allow this headers for request send to the API
 		"Access-Control-Allow-Headers",
 		"Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
 	);
 	res.setHeader(
 		// allow request with this methods(CRUD)
 		"Access-Control-Allow-Methods",
-		"GET, POST, PUT, DELETE, PATCH, OPTIONS"
+		"GET, POST, PUT, DELETE"
 	);
 	next();
 });
@@ -49,15 +54,25 @@ app.use((req, res, next) => {
 // use() to apply middleware at app
 //---------------------------------
 
+app.use(
+	helmet({
+		//allow frontend and backend to share resources (ports are different)
+		crossOriginResourcePolicy: false,
+	})
+);
 //to recover body request for read json files (convert into js object)
 app.use(express.json());
+
+//------------------------------------------------------------------------------------------------------
+//ROADS API
+//------------------------------------------------------------------------------------------------------
 //requêtes telechargement images
 app.use("/images", express.static(path.join(__dirname, "images")));
 // // liaison des routes dans sauce.js On importe get put delete etc et on l'applique à cette route /api/sauces
 app.use("/api/sauces", sauceRoutes);
 //enregistement des routes pour user
 app.use("/api/auth", userRoutes);
-// //road like dislike
+// //road  like dislike
 app.use("/api/sauces", likeRoutes);
 // export app, now we can use this app from the other files of the project
 module.exports = app;

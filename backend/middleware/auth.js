@@ -15,9 +15,9 @@ module.exports = (req, res, next) => {
 		const decodedToken = jwt.verify(token, process.env.TOKEN);
 		//qd on decode le token ca devient un objet js/on recupere le user id
 		const userId = decodedToken.userId;
-		//recupere l'identifiant utilisateur qui fait la requete
+		// Pour recuperer l'identifiant utilisateur qui fait la requete
 		req.auth = { userId };
-		// console.log(req);
+
 		//on verifie que le user id de la requete correponde bien au userId du token
 		if (req.body.userId && req.body.userId !== userId) {
 			throw "User ID non valable !";

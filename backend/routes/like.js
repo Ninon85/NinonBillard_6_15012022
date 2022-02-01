@@ -1,7 +1,5 @@
-// import express
-const express = require("express");
-//create router
-const router = express.Router();
+// import Router from express
+const router = require("express").Router();
 
 //import like controller
 const likeCtrl = require("../controllers/like");

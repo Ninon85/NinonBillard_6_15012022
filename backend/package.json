@@ -3,25 +3,24 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Ninon85/NinonBillard_6_15012022-/issues"
-  },
   "dependencies": {
     "bcrypt": "^5.0.1",
-    "dotenv": "^14.2.0",
+    "dotenv": "^14.3.2",
     "express": "^4.17.2",
-    "express-validator": "^6.14.0",
+    "helmet": "^5.0.2",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.1.7",
+    "mongoose": "^6.1.8",
     "mongoose-unique-validator": "^3.0.0",
     "multer": "^1.4.4",
-    "node": "^17.3.1",
-    "server": "^1.0.37"
-  }
+    "nodemon": "^2.0.15",
+    "password-validator": "^5.2.1",
+    "validator": "^13.7.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC"
 }

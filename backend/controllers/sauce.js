@@ -2,91 +2,99 @@
 const Sauce = require("../models/Sauce");
 //importation de fs( permet d'acceder au système de fichiers)
 const fs = require("fs");
-//import express-validator for protect appli of injection attack
-const { check, validationResult } = require("express-validator");
+
 //function for create a sauce
 exports.createSauce = (req, res, next) => {
 	const body = JSON.parse(req.body.sauce);
-	// console.log(body);
-	// console.log(body.name);
-	// const name = body.name;
-	// const manufacturer = body.manufacturer;
-	// const description = body.description;
-	// const mainPepper = body.mainPepper;
-
-	// [
-	// 	check("name").isLength({ min: 3 }),
-	// 	check("manufacturer").isLength({ min: 3 }),
-	// 	check("description").isLength({ min: 3 }),
-	// 	check("mainPepper").isLength({ min: 3 }),
-	// ],
-	// 	(req, res) => {
-	// const errors = validationResult(req);
-	// if (!errors.isEmpty()) {
-	// 	return res.status(422).json({ errors: errors.array() });
-	// } else {
-	const sauce = new Sauce({
-		...body,
-		imageUrl: `${req.protocol}://${req.get("host")}/images/${
-			req.file.filename
-		}`,
-	});
-	sauce
-		.save()
-		.then(() => res.status(201).json({ message: "sauce créee !" }))
-		.catch((error) => {
-			// console.log(error);
-			res.status(400).json({ error });
+	const regex = /[$^{=}]/;
+	if (
+		body.name.match(regex) ||
+		body.manufacturer.match(regex) ||
+		body.description.match(regex) ||
+		body.mainPepper.match(regex)
+	) {
+		console.log("erreur caractère");
+		res.status(400).json({
+			message:
+				"Au moins 1 caractère non autorisé détecté dans les champs saisis",
 		});
-	// 	}
-	// };
+	} else {
+		console.log(body);
+		const sauce = new Sauce({
+			...body,
+			imageUrl: `${req.protocol}://${req.get("host")}/images/${
+				req.file.filename
+			}`,
+		});
+
+		sauce
+			.save()
+			.then(() => res.status(201).json({ message: "sauce créee !" }))
+			.catch((error) => {
+				res.status(400).json({ error });
+			});
+	}
 };
 
 //update a sauce
 exports.modifySauce = (req, res, next) => {
 	// console.log(req);
-
+	// console.log(req.auth);
 	let sauceObject;
+
+	const regex = /[$^{=}]/;
 	if (req.file) {
-		Sauce.findOne({ _id: req.params.id }).then((sauce) => {
-			const filename = sauce.imageUrl.split("/images/")[1];
-			//delete the old picture
-			fs.unlinkSync(`images/${filename}`);
-		});
 		sauceObject = {
 			...JSON.parse(req.body.sauce),
 			imageUrl: `${req.protocol}://${req.get("host")}/images/${
 				req.file.filename
 			}`,
 		};
+		Sauce.findOne({ _id: req.params.id })
+			.then((sauce) => {
+				const filename = sauce.imageUrl.split("/images/")[1];
+				//delete the old picture
+				fs.unlinkSync(`images/${filename}`);
+			})
+			.catch((error) => res.status(500).json({ error }));
 	} else {
 		sauceObject = { ...req.body };
 	}
-	Sauce.updateOne(
-		{ _id: req.params.id },
-		{ ...sauceObject, _id: req.params.id }
-	)
-		.then(() => res.status(200).json({ message: "sauce modifiée ! " }))
-		.catch((error) => res.status(400).json({ error }));
+	if (
+		sauceObject.name.match(regex) ||
+		sauceObject.manufacturer.match(regex) ||
+		sauceObject.description.match(regex) ||
+		sauceObject.mainPepper.match(regex)
+	) {
+		res.status(400).json({ message: "caractère non autorisé" });
+	} else {
+		Sauce.updateOne(
+			{ _id: req.params.id },
+			{ ...sauceObject, _id: req.params.id }
+		)
+			.then(() => res.status(200).json({ message: "sauce modifiée ! " }))
+			.catch((error) => res.status(400).json({ error }));
+	}
 };
 //delete a sauce
 exports.deleteSauce = (req, res, next) => {
 	Sauce.findOne({ _id: req.params.id }).then((sauce) => {
 		if (!sauce) {
 			res.status(404).json({
-				error: new Error("No such Sauce"),
+				error: new Error("Aucune sauce trouvée"),
 			});
 		}
+		//verify client is the owner
 		if (sauce.userId !== req.auth.userId) {
 			res.status(400).json({
-				error: new Error("Unauthorized request!"),
+				error: new Error("Requête non autorisée !"),
 			});
 		}
 		const filename = sauce.imageUrl.split("/images/")[1];
 		fs.unlink(`images/${filename}`, () => {
 			Sauce.deleteOne({ _id: req.params.id }).then(() => {
 				res.status(200).json({
-					message: "Deleted!",
+					message: "Supprimée !",
 				});
 			});
 		}).catch((error) => {

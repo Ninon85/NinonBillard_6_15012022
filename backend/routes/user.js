@@ -1,9 +1,5 @@
-// import express
-const express = require("express");
-
-//create router
-
-const router = express.Router();
+// import router from express express
+const router = require("express").Router();
 
 // controller pr associer les fonctions aux differentes routes
 const userCtrl = require("../controllers/user");

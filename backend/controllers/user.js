@@ -2,49 +2,51 @@
 const bcrypt = require("bcrypt");
 //importation de jsonwebtoken (creation de token et verification)
 const jwt = require("jsonwebtoken");
-//import express-validator for protect appli of injection attack
-const { body, validationResult } = require("express-validator");
+//import password-validator
+const passwordValidator = require("password-validator");
 //importation du modele de schema de donnée User
 const User = require("../models/User");
 
+const schemaPassword = new passwordValidator();
+schemaPassword
+	.is()
+	.min(8) // Minimum length 8
+	.is()
+	.max(20) // Maximum length 20
+	.has()
+	.uppercase() // Must have uppercase letters
+	.has()
+	.lowercase() // Must have lowercase letters
+	.has()
+	.digits(1) // Must have at least 1 digits
+	.has()
+	.not()
+	.spaces(); // Should not have spaces
 //middleware (fonction) pr enregistrer de nouveaux utilisateurs
-exports.signup = [
-	// email must be an email
-	body("email").isEmail(),
-	body("password")
-		.matches(
-			/^(?=.*[A-Z].*[A-Z])(?=.*[!@#&*])(?=.*[0-9].*[0-9])(?=.*[a-z].*[a-z].*[a-z]).{8,}$/
-		)
-		.withMessage(
-			"Le mot de passe doit contenir minimum 8 caractères, une majuscule, un chiffre et un caractère spécial"
-		),
-	// .matches(/\d/)
-	// .withMessage("Le mot de passe doit contenir au moins un chiffre"),
-	(req, res) => {
-		// Finds the validation errors in this request and wraps them in an object with handy functions
-		const errors = validationResult(req);
-		if (!errors.isEmpty()) {
-			console.log(errors.array());
-			return res.status(400).json({ errors: errors.array() });
-		} else {
-			//----------------------------------------------------------------------------------
-			bcrypt
-				.hash(req.body.password, 10)
-				.then((hash) => {
-					const user = new User({
-						email: req.body.email,
-						password: hash,
-					});
-					user
-						.save()
-						.then(() => res.status(201).json({ message: "Utilisateur créé !" }))
-						.catch((error) => res.status(400).json({ error }));
-				})
-				.catch((error) => res.status(500).json({ error }));
-		}
-	},
-];
+exports.signup = (req, res) => {
+	//----------------------------------------------------------------------------------
 
+	if (schemaPassword.validate(req.body.password)) {
+		bcrypt
+			.hash(req.body.password, 10)
+			.then((hash) => {
+				const user = new User({
+					email: req.body.email,
+					password: hash,
+				});
+				user
+					.save()
+					.then(() => res.status(201).json({ message: "Utilisateur créé !" }))
+					.catch((error) => res.status(400).json({ error }));
+			})
+			.catch((error) => res.status(500).json({ error }));
+	} else {
+		res.status(400).json({
+			message:
+				"Le mot de passe doit faire entre 8 et 20 caractères, comprenant  au moins 1 lettre majuscule 1 minuscule et 1 chiffre. ",
+		});
+	}
+};
 //middleware (fonction) pr connecter des utilisateurs existants
 exports.login = (req, res, next) => {
 	User.findOne({ email: req.body.email })
