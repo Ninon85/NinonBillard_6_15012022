@@ -15,12 +15,13 @@ module.exports = (req, res, next) => {
 		const decodedToken = jwt.verify(token, process.env.TOKEN);
 		//qd on decode le token ca devient un objet js/on recupere le user id
 		const userId = decodedToken.userId;
-		// Pour recuperer l'identifiant utilisateur qui fait la requete
+		//On ajoute attribut (objet) auth à la requête afin de verifier le owner de la sauce à delete
 		req.auth = { userId };
 
 		//on verifie que le user id de la requete correponde bien au userId du token
 		if (req.body.userId && req.body.userId !== userId) {
-			throw "User ID non valable !";
+			// throw "User ID non valable !";
+			res.status(403).json({ 403: "Unauthorized request" });
 		} else {
 			//si tout va bien, on passe la requête au middleware suivant
 			next();

@@ -66,7 +66,9 @@ exports.modifySauce = (req, res, next) => {
 		sauceObject.description.match(regex) ||
 		sauceObject.mainPepper.match(regex)
 	) {
-		res.status(400).json({ message: "caractère non autorisé" });
+		res.status(400).json({
+			message: "Au moins un caractère non autorisé saisi dans les champs",
+		});
 	} else {
 		Sauce.updateOne(
 			{ _id: req.params.id },
@@ -78,6 +80,7 @@ exports.modifySauce = (req, res, next) => {
 };
 //delete a sauce
 exports.deleteSauce = (req, res, next) => {
+	// console.log(req.params);
 	Sauce.findOne({ _id: req.params.id }).then((sauce) => {
 		if (!sauce) {
 			res.status(404).json({
@@ -86,22 +89,23 @@ exports.deleteSauce = (req, res, next) => {
 		}
 		//verify client is the owner
 		if (sauce.userId !== req.auth.userId) {
-			res.status(400).json({
-				error: new Error("Requête non autorisée !"),
+			res.status(403).json({
+				message: "Requête non autorisée !",
 			});
-		}
-		const filename = sauce.imageUrl.split("/images/")[1];
-		fs.unlink(`images/${filename}`, () => {
-			Sauce.deleteOne({ _id: req.params.id }).then(() => {
-				res.status(200).json({
-					message: "Supprimée !",
+		} else {
+			const filename = sauce.imageUrl.split("/images/")[1];
+			fs.unlink(`images/${filename}`, () => {
+				Sauce.deleteOne({ _id: req.params.id }).then(() => {
+					res.status(200).json({
+						message: "Supprimée !",
+					});
+				});
+			}).catch((error) => {
+				res.status(400).json({
+					error: error,
 				});
 			});
-		}).catch((error) => {
-			res.status(400).json({
-				error: error,
-			});
-		});
+		}
 	});
 };
 // get 1 sauce by id

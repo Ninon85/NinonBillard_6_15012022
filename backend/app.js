@@ -66,13 +66,13 @@ app.use(express.json());
 //------------------------------------------------------------------------------------------------------
 //ROADS API
 //------------------------------------------------------------------------------------------------------
-//requêtes telechargement images
+//request images
 app.use("/images", express.static(path.join(__dirname, "images")));
-// // liaison des routes dans sauce.js On importe get put delete etc et on l'applique à cette route /api/sauces
+//request sauces
 app.use("/api/sauces", sauceRoutes);
-//enregistement des routes pour user
+//request user
 app.use("/api/auth", userRoutes);
-// //road  like dislike
+// //request like dislike
 app.use("/api/sauces", likeRoutes);
 // export app, now we can use this app from the other files of the project
 module.exports = app;
