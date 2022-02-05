@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
 		const decodedToken = jwt.verify(token, process.env.TOKEN);
 		//qd on decode le token ca devient un objet js/on recupere le user id
 		const userId = decodedToken.userId;
-		//On ajoute attribut (objet) auth à la requête afin de verifier le owner de la sauce à delete
+		//On ajoute attribut (objet) auth à la requête afin de verifier le owner de la sauce pr delete
 		req.auth = { userId };
 
 		//on verifie que le user id de la requete correponde bien au userId du token

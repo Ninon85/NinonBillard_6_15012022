@@ -6,7 +6,7 @@ const fs = require("fs");
 //function for create a sauce
 exports.createSauce = (req, res, next) => {
 	const body = JSON.parse(req.body.sauce);
-	const regex = /[$^{=}]/;
+	const regex = /[$^{=}<>]/;
 	if (
 		body.name.match(regex) ||
 		body.manufacturer.match(regex) ||
@@ -39,10 +39,9 @@ exports.createSauce = (req, res, next) => {
 //update a sauce
 exports.modifySauce = (req, res, next) => {
 	// console.log(req);
-	// console.log(req.auth);
 	let sauceObject;
-
-	const regex = /[$^{=}]/;
+	const regex = /[$^{=}<>]/;
+	//if there is a file in the request
 	if (req.file) {
 		sauceObject = {
 			...JSON.parse(req.body.sauce),
@@ -50,16 +49,10 @@ exports.modifySauce = (req, res, next) => {
 				req.file.filename
 			}`,
 		};
-		Sauce.findOne({ _id: req.params.id })
-			.then((sauce) => {
-				const filename = sauce.imageUrl.split("/images/")[1];
-				//delete the old picture
-				fs.unlinkSync(`images/${filename}`);
-			})
-			.catch((error) => res.status(500).json({ error }));
 	} else {
 		sauceObject = { ...req.body };
 	}
+	//verify values
 	if (
 		sauceObject.name.match(regex) ||
 		sauceObject.manufacturer.match(regex) ||
@@ -68,8 +61,43 @@ exports.modifySauce = (req, res, next) => {
 	) {
 		res.status(400).json({
 			message: "Au moins un caractère non autorisé saisi dans les champs",
+			//----------------------------------
 		});
-	} else {
+		if (req.file) {
+			const imageToDelete = sauceObject.imageUrl.split("/images/")[1];
+			//delete picture if values have prohibited characters
+			fs.unlinkSync(`images/${imageToDelete}`);
+		}
+		//if there is a file in the request ant if there's not prohibited characters
+	} else if (
+		req.file &&
+		!sauceObject.name.match(regex) &&
+		!sauceObject.manufacturer.match(regex) &&
+		!sauceObject.description.match(regex) &&
+		!sauceObject.mainPepper.match(regex)
+	) {
+		//-------------------------
+		Sauce.findOne({ _id: req.params.id })
+			.then((sauce) => {
+				const filename = sauce.imageUrl.split("/images/")[1];
+				//delete the old picture
+				fs.unlinkSync(`images/${filename}`);
+			})
+			.catch((error) => res.status(400).json({ error }));
+		//---------------------------------
+		Sauce.updateOne(
+			{ _id: req.params.id },
+			{ ...sauceObject, _id: req.params.id }
+		)
+			.then(() => res.status(200).json({ message: "sauce modifiée ! " }))
+			.catch((error) => res.status(400).json({ error }));
+	} else if (
+		!req.file &&
+		!sauceObject.name.match(regex) &&
+		!sauceObject.manufacturer.match(regex) &&
+		!sauceObject.description.match(regex) &&
+		!sauceObject.mainPepper.match(regex)
+	) {
 		Sauce.updateOne(
 			{ _id: req.params.id },
 			{ ...sauceObject, _id: req.params.id }

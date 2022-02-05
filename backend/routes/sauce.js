@@ -8,7 +8,9 @@ const auth = require("../middleware/auth");
 const multer = require("../middleware/multer-config");
 //import controller sauce
 const sauceCtrl = require("../controllers/sauce");
-
+//--------------------------------------------------------------------
+//CRUD
+//--------------------------------------------------------------------
 //create a sauce
 router.post("/", auth, multer, sauceCtrl.createSauce);
 //update a sauce
