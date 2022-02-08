@@ -19,7 +19,7 @@ exports.createSauce = (req, res, next) => {
 				"Au moins 1 caractère non autorisé détecté dans les champs saisis",
 		});
 	} else {
-		console.log(body);
+		// console.log(body);
 		const sauce = new Sauce({
 			...body,
 			imageUrl: `${req.protocol}://${req.get("host")}/images/${
@@ -49,6 +49,12 @@ exports.modifySauce = (req, res, next) => {
 				req.file.filename
 			}`,
 		};
+		// when there is a file in the request, we have to verify user is the owner of the sauce ( middleware only verify userId in the body request)
+		if (sauceObject.userId !== req.auth.userId) {
+			res.status(403).json({
+				message: "Requête non autorisée !",
+			});
+		}
 	} else {
 		sauceObject = { ...req.body };
 	}

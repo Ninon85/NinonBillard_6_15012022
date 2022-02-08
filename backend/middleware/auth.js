@@ -18,7 +18,7 @@ module.exports = (req, res, next) => {
 		//On ajoute attribut (objet) auth à la requête afin de verifier le owner de la sauce pr delete
 		req.auth = { userId };
 
-		//on verifie que le user id de la requete correponde bien au userId du token
+		//on verifie que le user id de la requête correponde bien au userId du token
 		if (req.body.userId && req.body.userId !== userId) {
 			// throw "User ID non valable !";
 			res.status(403).json({ 403: "Unauthorized request" });
@@ -27,6 +27,7 @@ module.exports = (req, res, next) => {
 			next();
 		}
 	} catch (error) {
+		//Une authentification est nécessaire pour acceder à la requête
 		res.status(401).json({ error: error | "requête non authentifiée" });
 	}
 };

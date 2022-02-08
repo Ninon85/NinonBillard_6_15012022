@@ -51,5 +51,5 @@ const sauceSchema = mongoose.Schema({
 	},
 });
 
-//export sauceSchema for use model fronm the other files
+//export sauceSchema for use model from the other files
 module.exports = mongoose.model("Sauce", sauceSchema);
