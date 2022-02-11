@@ -49,17 +49,19 @@ exports.modifySauce = (req, res, next) => {
 				req.file.filename
 			}`,
 		};
-		// when there is a file in the request, we have to verify user is the owner of the sauce ( middleware only verify userId in the body request)
-		if (sauceObject.userId !== req.auth.userId) {
-			res.status(403).json({
-				message: "Requête non autorisée !",
-			});
-		}
 	} else {
 		sauceObject = { ...req.body };
 	}
-	//verify values
-	if (
+	// when there is a file in the request, we have to verify user is the owner of the sauce ( middleware only verify userId in the body request)
+	if (sauceObject.userId !== req.auth.userId) {
+		const imageToDelete = sauceObject.imageUrl.split("/images/")[1];
+		//delete picture if values have prohibited characters
+		fs.unlinkSync(`images/${imageToDelete}`);
+		res.status(403).json({
+			message: "Requête non autorisée !",
+		});
+		//verify values
+	} else if (
 		sauceObject.name.match(regex) ||
 		sauceObject.manufacturer.match(regex) ||
 		sauceObject.description.match(regex) ||
